@@ -19,6 +19,14 @@
 package org.example;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.util.Collector;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+
 
 /**
  * Skeleton for a Flink Batch Job.
@@ -59,8 +67,29 @@ public class BatchJob {
 		 * http://flink.apache.org/docs/latest/apis/batch/examples.html
 		 *
 		 */
-
+	    
+	    DataSet<String> text = env.fromElements("My First FLink Application");
+	    
+	    DataSet<Tuple2<String, Integer>> wordCounts = text
+	    		 .flatMap(new LineSplitter())
+	    		 .groupBy(0)
+	    		 .sum(1);
+	    		 wordCounts.print();
+	    
 		// execute program
 		env.execute("Flink Batch Java API Skeleton");
 	}
+	
+			public static class LineSplitter implements FlatMapFunction<String,
+			Tuple2<String, Integer>> {
+			 @Override
+			 public void flatMap(String line, Collector<Tuple2<String, Integer>>
+			out) {
+				 for (String word : line.split(" ")) {
+					 out.collect(new Tuple2<String, Integer>(word, 1));
+				 }
+			}
+		}
+
 }
+
