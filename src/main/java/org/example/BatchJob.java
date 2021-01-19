@@ -74,10 +74,9 @@ public class BatchJob {
 	    		 .flatMap(new LineSplitter())
 	    		 .groupBy(0)
 	    		 .sum(1);
-	    		 wordCounts.print();
 	    
 		// execute program
-		env.execute("Flink Batch Java API Skeleton");
+		wordCounts.print();
 	}
 	
 			public static class LineSplitter implements FlatMapFunction<String,
