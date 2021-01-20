@@ -24,8 +24,11 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.util.Collector;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.FilterFunction;
+import java.util.*;
 
 
 /**
@@ -75,8 +78,22 @@ public class BatchJob {
 	    		 .groupBy(0)
 	    		 .sum(1);
 	    
+	    DataSet<Integer> num = env.fromCollection(Arrays.asList(10, 2, 22, 30, 41, 9, 12, 8));
+	    DataSet<Integer> result = num.filter(new FilterFunction<Integer>() {
+	    	public boolean filter(Integer values) {
+	    		return values > 10;
+	    	}
+	    }).reduce((values, i) -> values + i);
+	    
+	    Tuple2<Integer, Integer> firstSet = new Tuple2<>(10, 20);
+	    Tuple2<Integer, Integer> secondSet = new Tuple2<>(30, 40);
+	    Tuple2<Integer, Integer> thirdSet = new Tuple2<>(50, 60);
+	    DataSet<Tuple2<Integer, Integer>> numbers = env.fromElements(firstSet, secondSet, thirdSet);
+	    DataSet<Integer> multiple = numbers.map(new Multiple());
 		// execute program
-		wordCounts.print();
+//		wordCounts.print();
+//		result.print();
+		multiple.print();
 	}
 	
 			public static class LineSplitter implements FlatMapFunction<String,
@@ -89,6 +106,13 @@ public class BatchJob {
 				 }
 			}
 		}
+			
+			public static class Multiple implements MapFunction<Tuple2<Integer, Integer>, Integer> {
+				@Override
+				public Integer map(Tuple2<Integer, Integer> value) {
+					return value.f0 * value.f1;
+				}
+			}
 
 }
 
